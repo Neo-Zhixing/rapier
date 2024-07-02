@@ -8,6 +8,7 @@ use crate::prelude::{query_pipeline_generators, ActiveEvents, CollisionEventFlag
 use parry::query::{DefaultQueryDispatcher, QueryDispatcher};
 use parry::utils::hashmap::HashMap;
 use std::collections::BinaryHeap;
+use std::sync::Arc;
 
 pub enum PredictedImpacts {
     Impacts(HashMap<RigidBodyHandle, Real>),
@@ -32,17 +33,14 @@ impl Default for CCDSolver {
 impl CCDSolver {
     /// Initializes a new CCD solver
     pub fn new() -> Self {
-        Self::with_query_dispatcher(DefaultQueryDispatcher)
+        Self::with_query_dispatcher(Arc::new(DefaultQueryDispatcher))
     }
 
     /// Initializes a CCD solver with a custom `QueryDispatcher` used for computing time-of-impacts.
     ///
     /// Use this constructor in order to use a custom `QueryDispatcher` that is aware of your own
     /// user-defined shapes.
-    pub fn with_query_dispatcher<D>(d: D) -> Self
-    where
-        D: 'static + QueryDispatcher,
-    {
+    pub fn with_query_dispatcher(d: Arc<dyn QueryDispatcher>) -> Self {
         CCDSolver {
             query_pipeline: QueryPipeline::with_query_dispatcher(d),
         }

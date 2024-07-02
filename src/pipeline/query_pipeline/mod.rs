@@ -272,7 +272,7 @@ impl Default for QueryPipeline {
 impl QueryPipeline {
     /// Initializes an empty query pipeline.
     pub fn new() -> Self {
-        Self::with_query_dispatcher(DefaultQueryDispatcher)
+        Self::with_query_dispatcher(Arc::new(DefaultQueryDispatcher))
     }
 
     fn as_composite_shape<'a>(
@@ -293,12 +293,9 @@ impl QueryPipeline {
     ///
     /// Use this constructor in order to use a custom `QueryDispatcher` that is
     /// aware of your own user-defined shapes.
-    pub fn with_query_dispatcher<D>(d: D) -> Self
-    where
-        D: 'static + QueryDispatcher,
-    {
+    pub fn with_query_dispatcher(query_dispatcher: Arc<dyn QueryDispatcher>) -> Self {
         Self {
-            query_dispatcher: Arc::new(d),
+            query_dispatcher,
             qbvh: Qbvh::new(),
             dilation_factor: 0.01,
             workspace: QbvhUpdateWorkspace::default(),

@@ -72,16 +72,15 @@ impl Default for NarrowPhase {
 impl NarrowPhase {
     /// Creates a new empty narrow-phase.
     pub fn new() -> Self {
-        Self::with_query_dispatcher(DefaultQueryDispatcher)
+        Self::with_query_dispatcher(Arc::new(DefaultQueryDispatcher))
     }
 
     /// Creates a new empty narrow-phase with a custom query dispatcher.
-    pub fn with_query_dispatcher<D>(d: D) -> Self
-    where
-        D: 'static + PersistentQueryDispatcher<ContactManifoldData, ContactData>,
-    {
+    pub fn with_query_dispatcher(
+        query_dispatcher: Arc<dyn PersistentQueryDispatcher<ContactManifoldData, ContactData>>,
+    ) -> Self {
         Self {
-            query_dispatcher: Arc::new(d),
+            query_dispatcher,
             contact_graph: InteractionGraph::new(),
             intersection_graph: InteractionGraph::new(),
             graph_indices: Coarena::new(),
