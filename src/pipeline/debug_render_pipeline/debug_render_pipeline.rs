@@ -453,7 +453,20 @@ impl DebugRenderPipeline {
                 let vtx = s.to_polyline(self.style.border_subdivisions);
                 backend.draw_line_strip(object, &vtx, pos, &Vector::repeat(1.0), color, true)
             }
-            TypedShape::Custom(_) => {}
+            TypedShape::Custom(s) => {
+                // For custom geometries, draw their AABB by default.
+                let vtx = &self.instances[&TypeId::of::<Cuboid>()];
+                let aabb = s.compute_aabb(pos);
+                let mid = aabb.center();
+                backend.draw_line_strip(
+                    object,
+                    vtx,
+                    &Isometry::from_parts(mid.into(), Default::default()),
+                    &(aabb.half_extents() * 2.0),
+                    color,
+                    true,
+                )
+            }
         }
     }
 
@@ -606,7 +619,19 @@ impl DebugRenderPipeline {
                 let (vtx, idx) = s.to_outline(self.style.border_subdivisions);
                 backend.draw_polyline(object, &vtx, &idx, pos, &Vector::repeat(1.0), color)
             }
-            TypedShape::Custom(_) => {}
+            TypedShape::Custom(s) => {
+                let (vtx, idx) = &self.instances[&TypeId::of::<Cuboid>()];
+                let aabb = s.compute_aabb(pos);
+                let mid = aabb.center();
+                backend.draw_polyline(
+                    object,
+                    vtx,
+                    idx,
+                    &Isometry::from_parts(mid.into(), Default::default()),
+                    &(aabb.half_extents() * 2.0),
+                    color,
+                )
+            }
         }
     }
 }
